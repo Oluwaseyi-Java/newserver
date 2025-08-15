@@ -102,33 +102,47 @@ module.exports.get_surveys_by_userId = (req, res) => {
 
 module.exports.post_signup_data = (req, res) => {
     console.log(req.body)
+    const checkIfExist={"email":req.body.email}
+    Fsurvey.findOne(checkIfExist, (err,item)=>{
+        if(err){
+            res.status(500).send({"error":err, "message":"An error has occured"})
+            console.log(err)
+        }
+        else if(item){
+            res.status(400).send({"message":"This account is already existing"})
 
-    setFSurvey({
-        _id: mongoose.Types.ObjectId(),
-        name: req.body.name,
-        email: req.body.email,
-        userName: req.body.userName,
-        phoneNo: req.body.phoneNumber,
-        password: req.body.password
+        }
+        else{
+            setFSurvey({
+                _id: mongoose.Types.ObjectId(),
+                name: req.body.name,
+                email: req.body.email,
+                userName: req.body.userName,
+                phoneNo: req.body.phoneNumber,
+                password: req.body.password
+            })
+                .then(result => {
+                    // setSurveys(result._id, {
+                    //     _id: mongoose.Types.ObjectId()
+                    // })
+                    //     .then(result => {
+                    //         console.log(result)
+        
+                    //     })
+                    //     .catch(error => {
+                    //         console.log(error)
+                    //     })
+                    res.status(201).send({"result":result,"message":"Account created successfully"})
+                    console.log(result)
+                })
+                .catch(error => {
+                    res.send(error)
+                    console.log(error)
+                })
+        }
     })
-        .then(result => {
-            // setSurveys(result._id, {
-            //     _id: mongoose.Types.ObjectId()
-            // })
-            //     .then(result => {
-            //         console.log(result)
 
-            //     })
-            //     .catch(error => {
-            //         console.log(error)
-            //     })
-            res.send(result)
-            console.log(result)
-        })
-        .catch(error => {
-            res.send(error)
-            console.log(error)
-        })
+    
 }
 
 module.exports.post_login_data = (req, res) => {
@@ -136,11 +150,11 @@ module.exports.post_login_data = (req, res) => {
     const details = { "email": req.body.email }
     Fsurvey.findOne(details, (err, item) => {
         if (err) {
-            res.send({ "error": err, "message": "An error has occurred, please check your internet connection." })
+            res.status(500).send({ "error": err, "message": "An error has occurred, please check your internet connection." })
             console.log(err)
         }
         else if (!item) {
-            res.send({ "message": "This account does not exist, try signing in." })
+            res.status(400).send({ "message": "This account does not exist, Please create a new account." })
         }
         else {
             if (item.email === req.body.email && item.password === req.body.password) {
@@ -149,14 +163,14 @@ module.exports.post_login_data = (req, res) => {
                     name: item.name,
                     email: item.email,
                     phoneNo: item.phoneNo,
-                    userName: item.userName
-
+                    userName: item.userName,
+                    message:"Logged In Successfully"
                 })
 
                 console.log(item)
             }
             else {
-                res.send({ "message": "Please check your password" })
+                res.status(400).send({ "message": "Incorrect password" })
             }
         }
     })

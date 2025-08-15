@@ -62,4 +62,3 @@ app.use((error, req, res, next) => {
         status: 401
     })
 })
-
